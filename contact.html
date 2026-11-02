@@ -111,15 +111,15 @@
 </header>
 <main><section class="rounded-3xl border border-amber-500/40 bg-slate-800 p-6 sm:p-8" id="step-booking"><h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-6">Contact Us</h1>
 <h3 class="text-2xl font-extrabold text-white mb-3">Send Your Booking Details</h3><p class="text-slate-300 mb-6">Fill in your details and submit the form to open your booking enquiry in WhatsApp. Review the message before sending it.</p>
-<form class="grid sm:grid-cols-2 gap-5" id="booking-form">
+<form class="space-y-5" id="booking-form">
 <div><label class="form-label" for="customer-name">Your Name *</label><input autocomplete="name" class="form-input" id="customer-name" name="name" placeholder="Enter your name" required=""/></div>
-<div><label class="form-label" for="customer-phone">Contact Number *</label><input autocomplete="tel" class="form-input" id="customer-phone" name="phone" placeholder="Enter your phone number" required="" type="tel"/></div>
+<div><label class="form-label" for="customer-phone">Contact Number *</label><input autocomplete="tel" class="form-input" id="customer-phone" name="phone" placeholder="Enter your phone number" required="" type="tel" inputmode="tel" pattern="[0-9+()\- ]{10,}"/></div>
 <div><label class="form-label" for="pickup">Pickup Location *</label><input class="form-input" id="pickup" name="pickup" placeholder="Where should we pick you up?" required=""/></div>
 <div><label class="form-label" for="destination">Destination *</label><input class="form-input" id="destination" name="destination" placeholder="Where are you going?" required=""/></div>
 <div><label class="form-label" for="travel-date">Travel Date *</label><input class="form-input" id="travel-date" name="date" required="" type="date"/></div>
 <div><label class="form-label" for="vehicle">Choose Vehicle *</label><select class="form-input" id="vehicle" name="vehicle" required=""><option value="">Select a vehicle</option><option>Sedan - Swift Dzire / Toyota Etios</option><option>Innova Crysta</option><option>Tempo Traveller</option><option>Mini Bus</option><option>Need help choosing</option></select></div>
-<div class="sm:col-span-2"><label class="form-label" for="trip-details">Additional Details</label><textarea class="form-input" id="trip-details" name="details" placeholder="Return date, number of passengers, sightseeing places, etc." rows="4"></textarea></div>
-<div class="sm:col-span-2"><button class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-3 text-lg" type="submit"><i class="fa-brands fa-whatsapp text-2xl"></i> Send Booking Enquiry on WhatsApp</button><p class="text-xs text-slate-400 text-center mt-3">No need to open separate pages. Complete all steps here on the Home Page.</p></div>
+<div><label class="form-label" for="trip-details">Additional Details</label><textarea class="form-input" id="trip-details" name="details" placeholder="Return date, number of passengers, sightseeing places, etc." rows="4"></textarea></div>
+<div><button class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-3 text-lg" type="submit"><i class="fa-brands fa-whatsapp text-2xl"></i> Send Booking Enquiry on WhatsApp</button><p class="text-xs text-slate-400 text-center mt-3">Complete your details here and review the booking message in WhatsApp before sending.</p></div>
 </form>
 </section></main><footer class="bg-slate-900 border-t border-slate-800 py-8">
 <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
@@ -147,7 +147,7 @@
         .destination-card h3,.benefit-card h3 { color:#fff; font-weight:800; font-size:1.1rem; margin-bottom:.4rem; }
         .destination-card p,.benefit-card p { color:#94a3b8; font-size:.9rem; line-height:1.6; }
         .form-label { display:block; color:#e2e8f0; font-size:.875rem; font-weight:700; margin-bottom:.5rem; }
-        .form-input { width:100%; background:#1e293b; border:1px solid #475569; border-radius:.75rem; padding:.85rem 1rem; color:#f8fafc; outline:none; }
+        .form-input { display:block; box-sizing:border-box; width:100%; min-height:56px; background:#1e293b; border:1px solid #475569; border-radius:.75rem; padding:.85rem 1rem; color:#f8fafc; outline:none; }
         .form-input:focus { border-color:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,.15); }
         .form-input::placeholder { color:#94a3b8; }
         @media(max-width:640px) {
@@ -179,20 +179,70 @@
         const bookingForm = document.getElementById('booking-form');
         if (bookingForm) bookingForm.addEventListener('submit', event => {
             event.preventDefault();
-            const form = new FormData(event.currentTarget);
+            if (!bookingForm.reportValidity()) return;
+            const form = new FormData(bookingForm);
+            const rawDate = form.get('date');
+            const travelDate = rawDate ? new Date(rawDate + 'T00:00:00').toLocaleDateString('en-GB') : 'Not provided';
             const message = [
                 'Hello Divya Tours And Travels, I want to enquire about a cab booking.',
                 '',
                 `Name: ${form.get('name')}`,
-                `Contact Number: ${form.get('phone')}`,
-                `Pickup Location: ${form.get('pickup')}`,
-                `Destination: ${form.get('destination')}`,
-                `Travel Date: ${form.get('date')}`,
-                `Vehicle: ${form.get('vehicle')}`,
-                `Additional Details: ${form.get('details') || 'Not provided'}`
-            ].join('\\n');
-            window.open('https://wa.me/917483314302?text=' + encodeURIComponent(message), '_blank', 'noopener');
+                `Phone Number: ${form.get('phone')}`,
+                `Pickup: ${form.get('pickup')}`,
+                `Drop: ${form.get('destination')}`,
+                `Pick Date: ${travelDate}`,
+                `Car Type: ${form.get('vehicle')}`,
+                `Trip Details: ${form.get('details') || 'Not provided'}`
+            ].join('\n');
+            const whatsappUrl = 'https://wa.me/917483314302?text=' + encodeURIComponent(message);
+            window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
         });
         const yearEl = document.getElementById('year'); if (yearEl) yearEl.textContent = new Date().getFullYear();
     </script>
+
+<section id="popular-routes-seo" class="bg-slate-950 border-t border-slate-800 py-10 px-4 sm:px-6" aria-labelledby="popular-routes-heading">
+  <div class="max-w-7xl mx-auto">
+    <h2 id="popular-routes-heading" class="text-xl sm:text-2xl font-extrabold text-white text-center mb-3">Popular Taxi Routes &amp; Travel Services in Bengaluru</h2>
+    <p class="text-slate-300 text-sm sm:text-base text-center max-w-3xl mx-auto mb-8 leading-relaxed">
+      Divya Tours and Travels offers airport pickup and drop, local cab bookings and outstation journeys from Bengaluru. Contact us to check vehicle availability and plan your trip.
+    </p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h3 class="text-lg font-bold text-amber-400 mb-3">Bengaluru Airport Pickup &amp; Drop Areas</h3>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-slate-300 text-sm leading-relaxed">
+          <li>Electronic City</li><li>Koramangala</li>
+          <li>MG Road</li><li>Indiranagar</li>
+          <li>Marathahalli</li><li>Whitefield</li>
+          <li>BTM Layout</li><li>Jayanagar</li>
+          <li>JP Nagar</li><li>Banashankari</li>
+          <li>HSR Layout</li><li>Hebbal</li>
+          <li>Yelahanka</li><li>KR Puram</li>
+          <li>Brookefield</li><li>Frazer Town</li>
+          <li>Rajajinagar</li><li>Vijayanagar</li>
+          <li>Bannerghatta Road</li><li>Yeshwanthpur</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-amber-400 mb-3">Outstation Taxi Destinations</h3>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-slate-300 text-sm leading-relaxed">
+          <li>Bengaluru to Mysuru</li><li>Bengaluru to Coorg</li>
+          <li>Bengaluru to Ooty</li><li>Bengaluru to Chennai</li>
+          <li>Bengaluru to Coimbatore</li><li>Bengaluru to Puducherry</li>
+          <li>Bengaluru to Vellore</li><li>Bengaluru to Tirupati</li>
+          <li>Bengaluru to Chikkamagaluru</li><li>Bengaluru to Shivamogga</li>
+          <li>One-way outstation taxi</li><li>Round-trip cab booking</li>
+          <li>Local sightseeing cabs</li><li>Family and group travel</li>
+          <li>Tempo Traveller hire</li><li>Corporate travel services</li>
+        </ul>
+      </div>
+    </div>
+    <p class="text-slate-400 text-xs text-center mt-8 leading-relaxed">
+      Airport transfers, local travel and outstation cab services are subject to route and vehicle availability. For bookings, call
+      <a class="text-amber-400 font-semibold hover:underline" href="tel:+917483314302">74833 14302</a>
+      or
+      <a class="text-emerald-400 font-semibold hover:underline" href="https://wa.me/917483314302">WhatsApp Divya Tours and Travels</a>.
+    </p>
+  </div>
+</section>
+
 </body></html>
